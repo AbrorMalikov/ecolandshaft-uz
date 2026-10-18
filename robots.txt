@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ecolandshaft.uz/sitemap.xml
+Host: https://ecolandshaft.uz

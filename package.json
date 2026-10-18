@@ -1,0 +1,9 @@
+{
+  "name": "eco-landshaft-uz",
+  "version": "1.0.0",
+  "description": "Eco Landshaft (ecolandshaft.uz) — SEO-friendly Apple Liquid Glass & Bento Grid Website (Services, E-Commerce, Interactive Calculator, Programmatic Regional SEO)",
+  "scripts": {
+    "build": "node build-site.js",
+    "start": "python3 -m http.server 4173"
+  }
+}
