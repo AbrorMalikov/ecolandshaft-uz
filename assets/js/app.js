@@ -55,12 +55,18 @@ function initHeaderNavigation() {
 }
 
 /* --------------------------------------------------------------------------
-   2. 5-LANGUAGE SWITCHER (O'zbek Lotin, O'zbek Kirill, Rus, Ingliz, Xitoy)
+   2. 5-LANGUAGE SWITCHER (Dedicated URLs for UZ, UZ-KR, RU + EN/ZH preview)
    -------------------------------------------------------------------------- */
+function getPageLang() {
+  const htmlLang = (document.documentElement.getAttribute('lang') || 'uz').toLowerCase();
+  if (htmlLang === 'ru') return 'ru';
+  if (htmlLang === 'uz-cyrl') return 'uz-Cyrl';
+  return 'uz';
+}
+
 function initLanguageSwitcher() {
   const switcher = document.querySelector('.lang-switcher');
   const trigger = document.querySelector('.lang-trigger');
-  const currentLabel = document.querySelector('.lang-current-label');
   const options = document.querySelectorAll('.lang-option');
 
   if (!switcher || !trigger) return;
@@ -74,149 +80,172 @@ function initLanguageSwitcher() {
     switcher.classList.remove('open');
   });
 
-  options.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+  options.forEach((opt) => {
+    opt.addEventListener('click', (e) => {
+      // If it's a real <a href="..."> link (UZ, UZ-KR, RU), allow normal navigation
+      if (opt.tagName === 'A' && opt.getAttribute('href')) {
+        switcher.classList.remove('open');
+        return;
+      }
       e.stopPropagation();
-      const lang = btn.dataset.lang;
-      const label = btn.dataset.label;
-
-      options.forEach((o) => o.classList.remove('active'));
-      btn.classList.add('active');
-      if (currentLabel) currentLabel.textContent = label;
+      const lang = opt.dataset.lang;
+      const label = opt.dataset.label;
       switcher.classList.remove('open');
 
-      if (lang === 'uz-Cyrl') {
-        transliteratePageToCyrillic();
-        showToast("Саҳифа Ўзбек (Кирилл) алифбосига ўтказилди");
-      } else if (lang === 'uz-Latn') {
-        restoreLatinText();
-        showToast("Sahifa O'zbek (Lotin) tiliga o'tkazildi");
-      } else {
-        restoreLatinText();
-        const messages = {
-          ru: "Основной язык сайта: O'zbek tili. Русская версия скоро будет доступна (ecolandshaft.uz/ru/).",
-          en: "Primary language: Uzbek. English localization is ready for connection (ecolandshaft.uz/en/).",
-          zh: "当前主语言为乌兹别克语 (O'zbek)。中文界面接口已就绪 (ecolandshaft.uz/zh/)。"
-        };
-        showToast(messages[lang] || "Til tanlandi: " + label);
-      }
+      const messages = {
+        en: 'English localization is coming soon (ecolandshaft.uz/en/). Available languages: UZ, ЎЗ (/uz-kr/), RU (/ru/).',
+        zh: '中文版本即将上线 (ecolandshaft.uz/zh/)。当前可用语言：UZ, ЎЗ (/uz-kr/), RU (/ru/)。'
+      };
+      showToast(messages[lang] || 'Language: ' + label);
     });
   });
 }
 
-const originalTextNodes = new Map();
-
-function latinToCyrillicUzbek(text) {
-  if (!text || !/[a-zA-Z]/.test(text)) return text;
-  let res = text;
-  const multiMap = [
-    [/O‘|O'|O`/g, 'Ў'], [/o‘|o'|o`/g, 'ў'],
-    [/G‘|G'|G`/g, 'Ғ'], [/g‘|g'|g`/g, 'ғ'],
-    [/Sh|SH/g, 'Ш'], [/sh/g, 'ш'],
-    [/Ch|CH/g, 'Ч'], [/ch/g, 'ч'],
-    [/Yo|YO/g, 'Ё'], [/yo/g, 'ё'],
-    [/Yu|YU/g, 'Ю'], [/yu/g, 'ю'],
-    [/Ya|YA/g, 'Я'], [/ya/g, 'я'],
-    [/Ye|YE/g, 'Е'], [/ye/g, 'е'],
-    [/Ts|TS/g, 'Ц'], [/ts/g, 'ц'],
-    [/’|'/g, 'ъ']
-  ];
-  multiMap.forEach(([regex, rep]) => {
-    res = res.replace(regex, rep);
-  });
-
-  const charMap = {
-    A: 'А', a: 'а', B: 'Б', b: 'б', D: 'Д', d: 'д', E: 'Э', e: 'е',
-    F: 'Ф', f: 'ф', G: 'Г', g: 'г', H: 'Ҳ', h: 'ҳ', I: 'И', i: 'и',
-    J: 'Ж', j: 'ж', K: 'К', k: 'к', L: 'Л', l: 'л', M: 'М', m: 'м',
-    N: 'Н', n: 'н', O: 'О', o: 'о', P: 'П', p: 'п', Q: 'Қ', q: 'қ',
-    R: 'Р', r: 'р', S: 'С', s: 'с', T: 'Т', t: 'т', U: 'У', u: 'у',
-    V: 'В', v: 'в', X: 'Х', x: 'х', Y: 'Й', y: 'й', Z: 'З', z: 'з'
-  };
-
-  return res.replace(/[A-Za-z]/g, (ch) => charMap[ch] || ch);
-}
-
-function transliteratePageToCyrillic() {
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-  let node;
-  while ((node = walker.nextNode())) {
-    const parent = node.parentElement;
-    if (!parent) continue;
-    const tag = parent.tagName;
-    if (tag === 'SCRIPT' || tag === 'STYLE' || parent.closest('.lang-menu')) continue;
-    if (!originalTextNodes.has(node)) {
-      originalTextNodes.set(node, node.nodeValue);
-    }
-    node.nodeValue = latinToCyrillicUzbek(originalTextNodes.get(node));
-  }
-}
-
-function restoreLatinText() {
-  originalTextNodes.forEach((val, node) => {
-    if (node && node.parentNode) {
-      node.nodeValue = val;
-    }
-  });
-}
-
 /* --------------------------------------------------------------------------
-   3. SMART INTERACTIVE CONVERSION CALCULATOR
+   3. SMART INTERACTIVE CONVERSION CALCULATOR (UZ / UZ-KR / RU)
    -------------------------------------------------------------------------- */
 function initSmartCalculator() {
   const calcRoot = document.getElementById('smartCalculator');
   if (!calcRoot) return;
 
-  const serviceRates = {
-    'suniy-gazon': {
-      title: "Sun'iy gazon (vors 20–50 mm)",
-      basePrice: 89000,
-      unitLabel: "m²",
-      rollSize: 50,
-      daysPer100m2: 1,
-      matLabel: "Rulonlar soni (2x25m)"
+  const pageLang = getPageLang();
+
+  const serviceRatesByLang = {
+    uz: {
+      'suniy-gazon': {
+        title: "Sun'iy gazon (vors 20–50 mm)",
+        basePrice: 89000,
+        rollSize: 50,
+        daysPer100m2: 1,
+        matLabel: 'Rulonlar soni (2x25m)'
+      },
+      'rulonli-gazon': {
+        title: 'Tabiiy rulonli gazon + yotqizish',
+        basePrice: 35000,
+        rollSize: 0.8,
+        daysPer100m2: 1.5,
+        matLabel: 'Tabiiy rulonlar soni'
+      },
+      'gazon-ekish': {
+        title: "Gazon urug'ini sepish va yer tayyorlash",
+        basePrice: 20000,
+        rollSize: 25,
+        daysPer100m2: 2,
+        matLabel: "Daniya urug'i (qop / 10kg)"
+      },
+      'stadion-qurish': {
+        title: "Mini-futbol stadion / tennis kort ('pod klyuch')",
+        basePrice: 217000,
+        rollSize: 100,
+        daysPer100m2: 3.5,
+        matLabel: 'FIFA sertifikatli chim + drenaj'
+      },
+      'rezina-maydon': {
+        title: 'Bolalar maydonchasi va EPDM/SBR rezina qoplama',
+        basePrice: 180000,
+        rollSize: 25,
+        daysPer100m2: 1.8,
+        matLabel: 'EPDM/SBR granula + PU kley'
+      },
+      'avtopoliv-landshaft': {
+        title: 'Landshaft dizayn + Hunter avtopoliv tizimi',
+        basePrice: 49000,
+        rollSize: 15,
+        daysPer100m2: 2.2,
+        matLabel: 'Hunter USA forsunka va klapanlar'
+      }
     },
-    'rulonli-gazon': {
-      title: "Tabiiy rulonli gazon + yotqizish",
-      basePrice: 35000,
-      unitLabel: "m²",
-      rollSize: 0.8,
-      daysPer100m2: 1.5,
-      matLabel: "Tabiiy rulonlar soni"
+    'uz-Cyrl': {
+      'suniy-gazon': {
+        title: 'Сунъий газон (ворс 20–50 мм)',
+        basePrice: 89000,
+        rollSize: 50,
+        daysPer100m2: 1,
+        matLabel: 'Рулонлар сони (2x25м)'
+      },
+      'rulonli-gazon': {
+        title: 'Табиий рулонли газон + ётқизиш',
+        basePrice: 35000,
+        rollSize: 0.8,
+        daysPer100m2: 1.5,
+        matLabel: 'Табиий рулонлар сони'
+      },
+      'gazon-ekish': {
+        title: 'Газон уруғини сепиш ва ер тайёрлаш',
+        basePrice: 20000,
+        rollSize: 25,
+        daysPer100m2: 2,
+        matLabel: 'Дания уруғи (қоп / 10кг)'
+      },
+      'stadion-qurish': {
+        title: 'Мини-футбол стадион / теннис корт («под ключ»)',
+        basePrice: 217000,
+        rollSize: 100,
+        daysPer100m2: 3.5,
+        matLabel: 'FIFA сертификатли чим + дренаж'
+      },
+      'rezina-maydon': {
+        title: 'Болалар майдончаси ва EPDM/SBR резина қоплама',
+        basePrice: 180000,
+        rollSize: 25,
+        daysPer100m2: 1.8,
+        matLabel: 'EPDM/SBR гранула + ПУ клей'
+      },
+      'avtopoliv-landshaft': {
+        title: 'Ландшафт дизайн + Hunter автополив тизими',
+        basePrice: 49000,
+        rollSize: 15,
+        daysPer100m2: 2.2,
+        matLabel: 'Hunter USA форсунка ва клапанлар'
+      }
     },
-    'gazon-ekish': {
-      title: "Gazon urug'ini sepish va yer tayyorlash",
-      basePrice: 20000,
-      unitLabel: "m²",
-      rollSize: 25,
-      daysPer100m2: 2,
-      matLabel: "Daniya urug'i (qop / 10kg)"
-    },
-    'stadion-qurish': {
-      title: "Mini-futbol stadion / tennis kort ('pod klyuch')",
-      basePrice: 217000,
-      unitLabel: "m²",
-      rollSize: 100,
-      daysPer100m2: 3.5,
-      matLabel: "FIFA sertifikatli chim + drenaj"
-    },
-    'rezina-maydon': {
-      title: "Bolalar maydonchasi va EPDM/SBR rezina qoplama",
-      basePrice: 180000,
-      unitLabel: "m²",
-      rollSize: 25,
-      daysPer100m2: 1.8,
-      matLabel: "EPDM/SBR granula + PU kley"
-    },
-    'avtopoliv-landshaft': {
-      title: "Landshaft dizayn + Hunter avtopoliv tizimi",
-      basePrice: 49000,
-      unitLabel: "m²",
-      rollSize: 15,
-      daysPer100m2: 2.2,
-      matLabel: "Hunter USA forsunka va klapanlar"
+    ru: {
+      'suniy-gazon': {
+        title: 'Искусственный газон (ворс 20–50 мм)',
+        basePrice: 89000,
+        rollSize: 50,
+        daysPer100m2: 1,
+        matLabel: 'Количество рулонов (2×25м)'
+      },
+      'rulonli-gazon': {
+        title: 'Натуральный рулонный газон + укладка',
+        basePrice: 35000,
+        rollSize: 0.8,
+        daysPer100m2: 1.5,
+        matLabel: 'Количество натуральных рулонов'
+      },
+      'gazon-ekish': {
+        title: 'Посев семян газона и подготовка грунта',
+        basePrice: 20000,
+        rollSize: 25,
+        daysPer100m2: 2,
+        matLabel: 'Датские семена DLF (мешок 10 кг)'
+      },
+      'stadion-qurish': {
+        title: 'Мини-футбольное поле / теннисный корт («под ключ»)',
+        basePrice: 217000,
+        rollSize: 100,
+        daysPer100m2: 3.5,
+        matLabel: 'Сертифицированный газон FIFA + дренаж'
+      },
+      'rezina-maydon': {
+        title: 'Детская площадка и покрытие EPDM/SBR',
+        basePrice: 180000,
+        rollSize: 25,
+        daysPer100m2: 1.8,
+        matLabel: 'Крошка EPDM/SBR + ПУ связующее'
+      },
+      'avtopoliv-landshaft': {
+        title: 'Ландшафтный дизайн + автополив Hunter',
+        basePrice: 49000,
+        rollSize: 15,
+        daysPer100m2: 2.2,
+        matLabel: 'Форсунки и клапаны Hunter (США)'
+      }
     }
   };
+
+  const serviceRates = serviceRatesByLang[pageLang] || serviceRatesByLang.uz;
 
   const shellEl = calcRoot.querySelector('.calculator-bento-shell');
   let currentService = (shellEl && shellEl.dataset.defaultService) || 'suniy-gazon';
@@ -241,7 +270,13 @@ function initSmartCalculator() {
 
     if (areaDisplay) {
       const sotix = (area / 100).toFixed(1);
-      areaDisplay.textContent = `${area.toLocaleString('ru-RU')} m² (${sotix} sotix)`;
+      if (pageLang === 'ru') {
+        areaDisplay.textContent = `${area.toLocaleString('ru-RU')} м² (${sotix} сотки)`;
+      } else if (pageLang === 'uz-Cyrl') {
+        areaDisplay.textContent = `${area.toLocaleString('ru-RU')} м² (${sotix} сотих)`;
+      } else {
+        areaDisplay.textContent = `${area.toLocaleString('ru-RU')} m² (${sotix} sotix)`;
+      }
     }
 
     let rate = cfg.basePrice;
@@ -254,12 +289,25 @@ function initSmartCalculator() {
     const rolls = Math.max(1, Math.ceil(area / cfg.rollSize));
     const days = Math.max(1, Math.ceil((area / 100) * cfg.daysPer100m2));
 
-    if (outTotal) outTotal.textContent = `${total.toLocaleString('ru-RU')} so'm`;
+    if (pageLang === 'ru') {
+      if (outTotal) outTotal.textContent = `${total.toLocaleString('ru-RU')} сум`;
+      if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} м²`;
+      if (outRolls) outRolls.textContent = `${rolls} ед. / компл.`;
+      if (outDays) outDays.textContent = `${days} – ${days + 2} дн.`;
+    } else if (pageLang === 'uz-Cyrl') {
+      if (outTotal) outTotal.textContent = `${total.toLocaleString('ru-RU')} сўм`;
+      if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} м²`;
+      if (outRolls) outRolls.textContent = `${rolls} бирлик / тўплам`;
+      if (outDays) outDays.textContent = `${days} – ${days + 2} кун`;
+    } else {
+      if (outTotal) outTotal.textContent = `${total.toLocaleString('ru-RU')} so'm`;
+      if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} m²`;
+      if (outRolls) outRolls.textContent = `${rolls} birlik / to'plam`;
+      if (outDays) outDays.textContent = `${days} – ${days + 2} kun`;
+    }
+
     if (outServiceTitle) outServiceTitle.textContent = cfg.title;
-    if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} m²`;
     if (outMatLabel) outMatLabel.textContent = cfg.matLabel;
-    if (outRolls) outRolls.textContent = `${rolls} birlik / to'plam`;
-    if (outDays) outDays.textContent = `${days} – ${days + 2} kun`;
   }
 
   typeBtns.forEach((btn) => {
@@ -286,6 +334,7 @@ function initEcommerceCatalog() {
   const filterBtns = document.querySelectorAll('.ecom-tab-btn[data-filter]');
   const priceModeBtns = document.querySelectorAll('.price-mode-btn');
   const productCards = document.querySelectorAll('.product-card');
+  const pageLang = getPageLang();
 
   let activeCategory = 'all';
   let priceMode = 'retail';
@@ -300,11 +349,21 @@ function initEcommerceCatalog() {
       if (priceEl) {
         const retail = parseInt(card.dataset.retail, 10);
         const wholesale = parseInt(card.dataset.wholesale, 10);
-        const unit = card.dataset.unit || 'm²';
+        const unit = card.dataset.unit || (pageLang === 'uz' ? 'm²' : 'м²');
         const val = priceMode === 'wholesale' ? wholesale : retail;
-        priceEl.innerHTML = `${val.toLocaleString('ru-RU')} so'm/${unit} <small class="js-price-note">${
-          priceMode === 'wholesale' ? "Optom (1-qo'ldan)" : 'Chakana narx'
-        }</small>`;
+        if (pageLang === 'ru') {
+          priceEl.innerHTML = `${val.toLocaleString('ru-RU')} сум/${unit} <small class="js-price-note">${
+            priceMode === 'wholesale' ? 'Оптом (из 1-х рук)' : 'Розничная цена'
+          }</small>`;
+        } else if (pageLang === 'uz-Cyrl') {
+          priceEl.innerHTML = `${val.toLocaleString('ru-RU')} сўм/${unit} <small class="js-price-note">${
+            priceMode === 'wholesale' ? 'Оптом (1-қўлдан)' : 'Чакана нарх'
+          }</small>`;
+        } else {
+          priceEl.innerHTML = `${val.toLocaleString('ru-RU')} so'm/${unit} <small class="js-price-note">${
+            priceMode === 'wholesale' ? "Optom (1-qo'ldan)" : 'Chakana narx'
+          }</small>`;
+        }
       }
     });
   }
@@ -404,6 +463,7 @@ function initPhoneOnlyForms() {
   });
 
   const forms = document.querySelectorAll('.js-phone-form');
+  const pageLang = getPageLang();
   forms.forEach((form) => {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -411,13 +471,25 @@ function initPhoneOnlyForms() {
       const rawDigits = telInput ? telInput.value.replace(/\D/g, '') : '';
 
       if (rawDigits.length < 12) {
-        showToast("Iltimos, to'liq telefon raqamingizni kiriting: +998 (XX) XXX-XX-XX");
+        if (pageLang === 'ru') {
+          showToast('Пожалуйста, введите полный номер телефона: +998 (XX) XXX-XX-XX');
+        } else if (pageLang === 'uz-Cyrl') {
+          showToast('Илтимос, тўлиқ телефон рақамингизни киритинг: +998 (XX) XXX-XX-XX');
+        } else {
+          showToast("Iltimos, to'liq telefon raqamingizni kiriting: +998 (XX) XXX-XX-XX");
+        }
         if (telInput) telInput.focus();
         return;
       }
 
       const context = form.dataset.context || 'Bepul konsultatsiya';
-      showToast(`Rahmat! ${telInput.value} raqami qabul qilindi (${context}). Mutaxassisimiz 15 daqiqa ichida bog'lanadi!`);
+      if (pageLang === 'ru') {
+        showToast(`Спасибо! Номер ${telInput.value} принят (${context}). Наш специалист свяжется с вами в течение 15 минут!`);
+      } else if (pageLang === 'uz-Cyrl') {
+        showToast(`Раҳмат! ${telInput.value} рақами қабул қилинди (${context}). Мутахассисимиз 15 дақиқа ичида боғланади!`);
+      } else {
+        showToast(`Rahmat! ${telInput.value} raqami qabul qilindi (${context}). Mutaxassisimiz 15 daqiqa ichida bog'lanadi!`);
+      }
       telInput.value = '';
 
       const modal = document.getElementById('quickLeadModal');
@@ -435,13 +507,26 @@ function initQuickModal() {
   const modalSub = document.getElementById('modalLeadSub');
   const modalForm = modal ? modal.querySelector('form') : null;
   const closeBtn = document.getElementById('modalCloseBtn');
+  const pageLang = getPageLang();
 
   document.querySelectorAll('.js-open-modal').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       if (!modal) return;
-      const title = btn.dataset.title || "Bepul konsultatsiya va o'lchov";
-      const sub = btn.dataset.sub || "Faqat telefon raqamingizni qoldiring — 15 daqiqada bog'lanib, aniq smeta beramiz.";
+      const defaultTitle =
+        pageLang === 'ru'
+          ? 'Бесплатная консультация и замер'
+          : pageLang === 'uz-Cyrl'
+          ? 'Бепул консультация ва ўлчов'
+          : "Bepul konsultatsiya va o'lchov";
+      const defaultSub =
+        pageLang === 'ru'
+          ? 'Оставьте ваш номер телефона — свяжемся за 15 минут и рассчитаем точную смету.'
+          : pageLang === 'uz-Cyrl'
+          ? 'Фақат телефон рақамингизни қолдиринг — 15 дақиқада боғланиб, аниқ смета берамиз.'
+          : "Faqat telefon raqamingizni qoldiring — 15 daqiqada bog'lanib, aniq smeta beramiz.";
+      const title = btn.dataset.title || defaultTitle;
+      const sub = btn.dataset.sub || defaultSub;
       if (modalTitle) modalTitle.textContent = title;
       if (modalSub) modalSub.textContent = sub;
       if (modalForm) modalForm.dataset.context = title;
