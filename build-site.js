@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { buildAllEn } = require('./build-site-en.js');
+const { buildAllZh } = require('./build-site-zh.js');
 
 const ROOT_DIR = __dirname;
 
@@ -492,39 +494,226 @@ const BLOG_POSTS = [
 ];
 
 /* ==========================================================================
-   ROUTE MAP & MULTI-LANGUAGE URL MAPPINGS (UZ / UZ-KR / RU)
+   ROUTE MAP & MULTI-LANGUAGE URL MAPPINGS (UZ / UZ-KR / RU / EN / ZH)
    ========================================================================== */
 const ROUTE_MAP = [
-  { id: 'home', uz: '/', 'uz-kr': '/uz-kr/', ru: '/ru/' },
-  { id: 'katalog', uz: '/katalog/', 'uz-kr': '/uz-kr/katalog/', ru: '/ru/katalog/' },
-  { id: 'katalog-suniy', uz: '/katalog/suniy-gazon/', 'uz-kr': '/uz-kr/katalog/suniy-gazon/', ru: '/ru/katalog/iskusstvennyy-gazon/' },
-  { id: 'katalog-rulonli', uz: '/katalog/rulonli-gazon/', 'uz-kr': '/uz-kr/katalog/rulonli-gazon/', ru: '/ru/katalog/rulonnyy-gazon/' },
-  { id: 'service-gazon', uz: '/xizmatlar/gazon-ekish-va-yotqizish/', 'uz-kr': '/uz-kr/xizmatlar/gazon-ekish-va-yotqizish/', ru: '/ru/uslugi/ukladka-i-posev-gazona/' },
-  { id: 'service-stadion', uz: '/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/', 'uz-kr': '/uz-kr/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/', ru: '/ru/uslugi/stroitelstvo-futbolnyh-poley-i-kortov/' },
-  { id: 'service-rezina', uz: '/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/', 'uz-kr': '/uz-kr/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/', ru: '/ru/uslugi/rezinovye-pokrytiya-i-detskie-ploshchadki/' },
-  { id: 'service-landshaft', uz: '/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/', 'uz-kr': '/uz-kr/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/', ru: '/ru/uslugi/landshaftnyy-dizayn-i-ozelenenie/' },
-  { id: 'service-avtopoliv', uz: '/xizmatlar/avtomatik-sugorish-tizimi/', 'uz-kr': '/uz-kr/xizmatlar/avtomatik-sugorish-tizimi/', ru: '/ru/uslugi/avtomaticheskiy-poliv-hunter/' },
-  { id: 'service-fitodekor', uz: '/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/', 'uz-kr': '/uz-kr/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/', ru: '/ru/uslugi/vertikalnoe-ozelenenie-fitodekor/' },
-  { id: 'region-samarkand', uz: '/samarkand/', 'uz-kr': '/uz-kr/samarkand/', ru: '/ru/samarkand/' },
-  { id: 'region-fergana', uz: '/fergana/', 'uz-kr': '/uz-kr/fergana/', ru: '/ru/fergana/' },
-  { id: 'region-andijan', uz: '/andijan/', 'uz-kr': '/uz-kr/andijan/', ru: '/ru/andizhan/' },
-  { id: 'region-bukhara', uz: '/bukhara/', 'uz-kr': '/uz-kr/bukhara/', ru: '/ru/buhara/' },
-  { id: 'region-kashkadarya', uz: '/kashkadarya/', 'uz-kr': '/uz-kr/kashkadarya/', ru: '/ru/kashkadarya/' },
-  { id: 'region-namangan', uz: '/namangan/', 'uz-kr': '/uz-kr/namangan/', ru: '/ru/namangan/' },
-  { id: 'about', uz: '/biz-haqimizda/', 'uz-kr': '/uz-kr/biz-haqimizda/', ru: '/ru/o-nas/' },
-  { id: 'blog', uz: '/blog/', 'uz-kr': '/uz-kr/blog/', ru: '/ru/blog/' },
-  { id: 'contact', uz: '/boglanish/', 'uz-kr': '/uz-kr/boglanish/', ru: '/ru/kontakty/' }
+  {
+    id: 'home',
+    uz: '/',
+    'uz-kr': '/uz-kr/',
+    ru: '/ru/',
+    en: '/en/',
+    zh: '/zh/'
+  },
+  {
+    id: 'katalog',
+    uz: '/katalog/',
+    'uz-kr': '/uz-kr/katalog/',
+    ru: '/ru/katalog/',
+    en: '/en/catalog/',
+    zh: '/zh/shangcheng/'
+  },
+  {
+    id: 'katalog-suniy',
+    uz: '/katalog/suniy-gazon/',
+    'uz-kr': '/uz-kr/katalog/suniy-gazon/',
+    ru: '/ru/katalog/iskusstvennyy-gazon/',
+    en: '/en/catalog/artificial-grass/',
+    zh: '/zh/shangcheng/renzao-caoping/'
+  },
+  {
+    id: 'katalog-rulonli',
+    uz: '/katalog/rulonli-gazon/',
+    'uz-kr': '/uz-kr/katalog/rulonli-gazon/',
+    ru: '/ru/katalog/rulonnyy-gazon/',
+    en: '/en/catalog/natural-turf-rolls/',
+    zh: '/zh/shangcheng/tianran-caoping/'
+  },
+  {
+    id: 'service-gazon',
+    uz: '/xizmatlar/gazon-ekish-va-yotqizish/',
+    'uz-kr': '/uz-kr/xizmatlar/gazon-ekish-va-yotqizish/',
+    ru: '/ru/uslugi/ukladka-i-posev-gazona/',
+    en: '/en/services/lawn-installation-and-seeding/',
+    zh: '/zh/fuwu/caoping-puzhe-yu-bozhong/'
+  },
+  {
+    id: 'service-stadion',
+    uz: '/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/',
+    'uz-kr': '/uz-kr/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/',
+    ru: '/ru/uslugi/stroitelstvo-futbolnyh-poley-i-kortov/',
+    en: '/en/services/football-pitch-and-sports-court-construction/',
+    zh: '/zh/fuwu/zuqiu-changdi-yu-tiyu-chang-jianshe/'
+  },
+  {
+    id: 'service-rezina',
+    uz: '/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/',
+    'uz-kr': '/uz-kr/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/',
+    ru: '/ru/uslugi/rezinovye-pokrytiya-i-detskie-ploshchadki/',
+    en: '/en/services/rubber-flooring-and-playground-construction/',
+    zh: '/zh/fuwu/xiangjiao-dimian-yu-ertong-youledang/'
+  },
+  {
+    id: 'service-landshaft',
+    uz: '/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/',
+    'uz-kr': '/uz-kr/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/',
+    ru: '/ru/uslugi/landshaftnyy-dizayn-i-ozelenenie/',
+    en: '/en/services/landscape-design-and-3d-greening/',
+    zh: '/zh/fuwu/yuanyi-jingguan-sheji-yu-lvhua/'
+  },
+  {
+    id: 'service-avtopoliv',
+    uz: '/xizmatlar/avtomatik-sugorish-tizimi/',
+    'uz-kr': '/uz-kr/xizmatlar/avtomatik-sugorish-tizimi/',
+    ru: '/ru/uslugi/avtomaticheskiy-poliv-hunter/',
+    en: '/en/services/hunter-automatic-irrigation-systems/',
+    zh: '/zh/fuwu/zidong-guangai-xitong-hunter/'
+  },
+  {
+    id: 'service-fitodekor',
+    uz: '/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/',
+    'uz-kr': '/uz-kr/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/',
+    ru: '/ru/uslugi/vertikalnoe-ozelenenie-fitodekor/',
+    en: '/en/services/vertical-greenery-and-stabilized-moss/',
+    zh: '/zh/fuwu/chuizhi-lvhua-yu-taihe-zhuangshi/'
+  },
+  {
+    id: 'region-samarkand',
+    uz: '/samarkand/',
+    'uz-kr': '/uz-kr/samarkand/',
+    ru: '/ru/samarkand/',
+    en: '/en/samarkand/',
+    zh: '/zh/samarkand/'
+  },
+  {
+    id: 'region-fergana',
+    uz: '/fergana/',
+    'uz-kr': '/uz-kr/fergana/',
+    ru: '/ru/fergana/',
+    en: '/en/fergana/',
+    zh: '/zh/fergana/'
+  },
+  {
+    id: 'region-andijan',
+    uz: '/andijan/',
+    'uz-kr': '/uz-kr/andijan/',
+    ru: '/ru/andizhan/',
+    en: '/en/andijan/',
+    zh: '/zh/andijan/'
+  },
+  {
+    id: 'region-bukhara',
+    uz: '/bukhara/',
+    'uz-kr': '/uz-kr/bukhara/',
+    ru: '/ru/buhara/',
+    en: '/en/bukhara/',
+    zh: '/zh/bukhara/'
+  },
+  {
+    id: 'region-kashkadarya',
+    uz: '/kashkadarya/',
+    'uz-kr': '/uz-kr/kashkadarya/',
+    ru: '/ru/kashkadarya/',
+    en: '/en/kashkadarya/',
+    zh: '/zh/kashkadarya/'
+  },
+  {
+    id: 'region-namangan',
+    uz: '/namangan/',
+    'uz-kr': '/uz-kr/namangan/',
+    ru: '/ru/namangan/',
+    en: '/en/namangan/',
+    zh: '/zh/namangan/'
+  },
+  {
+    id: 'about',
+    uz: '/biz-haqimizda/',
+    'uz-kr': '/uz-kr/biz-haqimizda/',
+    ru: '/ru/o-nas/',
+    en: '/en/about-us/',
+    zh: '/zh/guanyu-women/'
+  },
+  {
+    id: 'blog',
+    uz: '/blog/',
+    'uz-kr': '/uz-kr/blog/',
+    ru: '/ru/blog/',
+    en: '/en/blog/',
+    zh: '/zh/boke/'
+  },
+  {
+    id: 'contact',
+    uz: '/boglanish/',
+    'uz-kr': '/uz-kr/boglanish/',
+    ru: '/ru/kontakty/',
+    en: '/en/contact/',
+    zh: '/zh/lianxi-women/'
+  }
 ];
 
 function getRoute(pathOrUrl) {
   if (!pathOrUrl) return ROUTE_MAP[0];
   const p = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
   const norm = p.endsWith('/') ? p : `${p}/`;
-  return ROUTE_MAP.find((r) => r.uz === norm || r['uz-kr'] === norm || r.ru === norm) || {
-    uz: norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/',
-    'uz-kr': `/uz-kr${norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/'}`,
-    ru: `/ru${norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/'}`
+  return (
+    ROUTE_MAP.find(
+      (r) =>
+        r.uz === norm ||
+        r['uz-kr'] === norm ||
+        r.ru === norm ||
+        r.en === norm ||
+        r.zh === norm
+    ) || {
+      uz: norm.replace(/^\/(uz-kr|ru|en|zh)(?=\/|$)/, '') || '/',
+      'uz-kr': `/uz-kr${norm.replace(/^\/(uz-kr|ru|en|zh)(?=\/|$)/, '') || '/'}`,
+      ru: `/ru${norm.replace(/^\/(uz-kr|ru|en|zh)(?=\/|$)/, '') || '/'}`,
+      en: `/en${norm.replace(/^\/(uz-kr|ru|en|zh)(?=\/|$)/, '') || '/'}`,
+      zh: `/zh${norm.replace(/^\/(uz-kr|ru|en|zh)(?=\/|$)/, '') || '/'}`
+    }
+  );
+}
+
+function renderLangSwitcherMenu(activePath, currentLang = 'uz') {
+  const route = getRoute(activePath);
+  const currentLabelMap = {
+    uz: "O'zbek (Lotin)",
+    'uz-kr': 'Ўзбек (Кирилл)',
+    ru: 'Русский',
+    en: 'English',
+    zh: '中文'
   };
+  const currentLabel = currentLabelMap[currentLang] || "O'zbek (Lotin)";
+
+  return `
+        <div class="lang-switcher">
+          <button type="button" class="lang-trigger" aria-label="Select language">
+            <span class="lang-dot"></span>
+            <span class="lang-current-label">${currentLabel}</span>
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="lang-menu" role="menu">
+            <a href="${route.uz}" class="lang-option ${currentLang === 'uz' ? 'active' : ''}" data-lang="uz-Latn" data-label="O'zbek (Lotin)">
+              <span>O'zbek (Lotin)</span>
+              <span class="lang-code">UZ</span>
+            </a>
+            <a href="${route['uz-kr']}" class="lang-option ${currentLang === 'uz-kr' ? 'active' : ''}" data-lang="uz-Cyrl" data-label="Ўзбек (Кирилл)">
+              <span>Ўзбек (Кирилл)</span>
+              <span class="lang-code">ЎЗ</span>
+            </a>
+            <a href="${route.ru}" class="lang-option ${currentLang === 'ru' ? 'active' : ''}" data-lang="ru" data-label="Русский">
+              <span>Русский</span>
+              <span class="lang-code">RU</span>
+            </a>
+            <a href="${route.en}" class="lang-option ${currentLang === 'en' ? 'active' : ''}" data-lang="en" data-label="English">
+              <span>English</span>
+              <span class="lang-code">EN</span>
+            </a>
+            <a href="${route.zh}" class="lang-option ${currentLang === 'zh' ? 'active' : ''}" data-lang="zh" data-label="中文">
+              <span>中文</span>
+              <span class="lang-code">ZH</span>
+            </a>
+          </div>
+        </div>`;
 }
 
 /* ==========================================================================
@@ -537,7 +726,15 @@ function renderHead({ title, description, keywords, canonicalPath, schemaJson, l
   const uzUrl = `${BRAND.domain}${route.uz}`;
   const uzKrUrl = `${BRAND.domain}${route['uz-kr']}`;
   const ruUrl = `${BRAND.domain}${route.ru}`;
-  const ogLocale = lang === 'ru' ? 'ru_RU' : 'uz_UZ';
+  const enUrl = `${BRAND.domain}${route.en}`;
+  const zhUrl = `${BRAND.domain}${route.zh}`;
+  const ogLocaleMap = {
+    uz: 'uz_UZ',
+    ru: 'ru_RU',
+    en: 'en_US',
+    zh: 'zh_CN'
+  };
+  const ogLocale = ogLocaleMap[lang] || 'uz_UZ';
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -555,6 +752,8 @@ function renderHead({ title, description, keywords, canonicalPath, schemaJson, l
   <link rel="alternate" hreflang="uz-Latn" href="${uzUrl}" />
   <link rel="alternate" hreflang="uz-Cyrl" href="${uzKrUrl}" />
   <link rel="alternate" hreflang="ru" href="${ruUrl}" />
+  <link rel="alternate" hreflang="en" href="${enUrl}" />
+  <link rel="alternate" hreflang="zh" href="${zhUrl}" />
   <link rel="alternate" hreflang="x-default" href="${uzUrl}" />
 
   <!-- Open Graph / Social SEO -->
@@ -562,6 +761,8 @@ function renderHead({ title, description, keywords, canonicalPath, schemaJson, l
   <meta property="og:locale" content="${ogLocale}" />
   <meta property="og:locale:alternate" content="uz_UZ" />
   <meta property="og:locale:alternate" content="ru_RU" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
   <meta property="og:site_name" content="${BRAND.name} — ecolandshaft.uz" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
@@ -646,35 +847,7 @@ function renderHeader(activePath = '/') {
 
       <!-- Right Controls: 5-Language Switcher + Phone CTA -->
       <div class="header-actions">
-        <div class="lang-switcher">
-          <button type="button" class="lang-trigger" aria-label="Tilni tanlash">
-            <span class="lang-dot"></span>
-            <span class="lang-current-label">O'zbek (Lotin)</span>
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="lang-menu" role="menu">
-            <a href="${uzHref}" class="lang-option active" data-lang="uz-Latn" data-label="O'zbek (Lotin)">
-              <span>O'zbek (Lotin)</span>
-              <span class="lang-code">UZ</span>
-            </a>
-            <a href="${uzKrHref}" class="lang-option" data-lang="uz-Cyrl" data-label="Ўзбек (Кирилл)">
-              <span>Ўзбек (Кирилл)</span>
-              <span class="lang-code">ЎЗ</span>
-            </a>
-            <a href="${ruHref}" class="lang-option" data-lang="ru" data-label="Русский">
-              <span>Русский</span>
-              <span class="lang-code">RU</span>
-            </a>
-            <button type="button" class="lang-option" data-lang="en" data-label="English">
-              <span>English</span>
-              <span class="lang-code">EN</span>
-            </button>
-            <button type="button" class="lang-option" data-lang="zh" data-label="中文">
-              <span>中文 (Xitoy)</span>
-              <span class="lang-code">ZH</span>
-            </button>
-          </div>
-        </div>
+${renderLangSwitcherMenu(activePath, 'uz')}
 
         <a href="tel:${BRAND.phoneRaw}" class="header-phone-btn">
           ${ICONS.phone}
@@ -2731,35 +2904,7 @@ function renderHeaderRu(basePath = '/ru/') {
       </nav>
 
       <div class="header-actions">
-        <div class="lang-switcher">
-          <button type="button" class="lang-trigger" aria-label="Выбрать язык">
-            <span class="lang-dot"></span>
-            <span class="lang-current-label">Русский</span>
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="lang-menu" role="menu">
-            <a href="${uzHref}" class="lang-option" data-lang="uz-Latn" data-label="O'zbek (Lotin)">
-              <span>O'zbek (Lotin)</span>
-              <span class="lang-code">UZ</span>
-            </a>
-            <a href="${uzKrHref}" class="lang-option" data-lang="uz-Cyrl" data-label="Ўзбек (Кирилл)">
-              <span>Ўзбек (Кирилл)</span>
-              <span class="lang-code">ЎЗ</span>
-            </a>
-            <a href="${ruHref}" class="lang-option active" data-lang="ru" data-label="Русский">
-              <span>Русский</span>
-              <span class="lang-code">RU</span>
-            </a>
-            <button type="button" class="lang-option" data-lang="en" data-label="English">
-              <span>English</span>
-              <span class="lang-code">EN</span>
-            </button>
-            <button type="button" class="lang-option" data-lang="zh" data-label="中文">
-              <span>中文 (Xitoy)</span>
-              <span class="lang-code">ZH</span>
-            </button>
-          </div>
-        </div>
+${renderLangSwitcherMenu(basePath, 'ru')}
 
         <a href="tel:${BRAND.phoneRaw}" class="header-phone-btn">
           ${ICONS.phone}
@@ -4239,24 +4384,48 @@ function buildAll() {
   writePage('uz-kr/boglanish/index.html', convertUzHtmlToUzKr(contactUzHtml, '/boglanish/'));
   writePage('ru/kontakty/index.html', contactRuHtml);
 
-  // 10. Multi-language Sitemap with xhtml:link hreflang annotations
+  // Context for English and Chinese sub-builders
+  const sharedContext = {
+    ROOT_DIR,
+    BRAND,
+    ICONS,
+    ROUTE_MAP,
+    getRoute,
+    renderLangSwitcherMenu,
+    renderHead,
+    writePage
+  };
+
+  // 10. All 19 English pages
+  buildAllEn(sharedContext);
+
+  // 11. All 19 Chinese pages (Slugs in Latin Pinyin, Content in Simplified Chinese)
+  buildAllZh(sharedContext);
+
+  // 12. Multi-language Sitemap with xhtml:link hreflang annotations (5 languages: UZ, UZ-KR, RU, EN, ZH)
   const sitemapEntries = [];
   ROUTE_MAP.forEach((route) => {
     const uzLoc = `${BRAND.domain}${route.uz}`;
     const uzKrLoc = `${BRAND.domain}${route['uz-kr']}`;
     const ruLoc = `${BRAND.domain}${route.ru}`;
+    const enLoc = `${BRAND.domain}${route.en}`;
+    const zhLoc = `${BRAND.domain}${route.zh}`;
     const alternates = [
       `    <xhtml:link rel="alternate" hreflang="uz" href="${uzLoc}"/>`,
       `    <xhtml:link rel="alternate" hreflang="uz-Latn" href="${uzLoc}"/>`,
       `    <xhtml:link rel="alternate" hreflang="uz-Cyrl" href="${uzKrLoc}"/>`,
       `    <xhtml:link rel="alternate" hreflang="ru" href="${ruLoc}"/>`,
+      `    <xhtml:link rel="alternate" hreflang="en" href="${enLoc}"/>`,
+      `    <xhtml:link rel="alternate" hreflang="zh" href="${zhLoc}"/>`,
       `    <xhtml:link rel="alternate" hreflang="x-default" href="${uzLoc}"/>`
     ].join('\n');
 
     [
       { loc: uzLoc, prio: route.uz === '/' ? '1.0' : '0.9' },
       { loc: uzKrLoc, prio: route.uz === '/' ? '0.9' : '0.85' },
-      { loc: ruLoc, prio: route.ru === '/ru/' ? '0.95' : '0.9' }
+      { loc: ruLoc, prio: route.ru === '/ru/' ? '0.95' : '0.9' },
+      { loc: enLoc, prio: route.en === '/en/' ? '0.95' : '0.9' },
+      { loc: zhLoc, prio: route.zh === '/zh/' ? '0.95' : '0.9' }
     ].forEach(({ loc, prio }) => {
       sitemapEntries.push(`  <url>
     <loc>${loc}</loc>
@@ -4273,7 +4442,7 @@ ${alternates}
 ${sitemapEntries.join('\n')}
 </urlset>`;
   fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), sitemapXml, 'utf8');
-  console.log(`Generated: sitemap.xml (${ROUTE_MAP.length * 3} localized URLs with hreflang)`);
+  console.log(`Generated: sitemap.xml (${ROUTE_MAP.length * 5} localized URLs with hreflang)`);
 }
 
 buildAll();

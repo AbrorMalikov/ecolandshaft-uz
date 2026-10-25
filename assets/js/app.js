@@ -61,6 +61,8 @@ function getPageLang() {
   const htmlLang = (document.documentElement.getAttribute('lang') || 'uz').toLowerCase();
   if (htmlLang === 'ru') return 'ru';
   if (htmlLang === 'uz-cyrl') return 'uz-Cyrl';
+  if (htmlLang === 'en') return 'en';
+  if (htmlLang === 'zh') return 'zh';
   return 'uz';
 }
 
@@ -242,6 +244,94 @@ function initSmartCalculator() {
         daysPer100m2: 2.2,
         matLabel: 'Форсунки и клапаны Hunter (США)'
       }
+    },
+    en: {
+      'suniy-gazon': {
+        title: 'Artificial grass (pile 20–50 mm)',
+        basePrice: 89000,
+        rollSize: 50,
+        daysPer100m2: 1,
+        matLabel: 'Rolls required (2×25m)'
+      },
+      'rulonli-gazon': {
+        title: 'Natural turf rolls + installation',
+        basePrice: 35000,
+        rollSize: 0.8,
+        daysPer100m2: 1.5,
+        matLabel: 'Number of turf sod rolls'
+      },
+      'gazon-ekish': {
+        title: 'Lawn seeding & soil preparation',
+        basePrice: 20000,
+        rollSize: 25,
+        daysPer100m2: 2,
+        matLabel: 'Danish seed bags (10 kg)'
+      },
+      'stadion-qurish': {
+        title: 'Mini-football pitch / court (turnkey)',
+        basePrice: 217000,
+        rollSize: 100,
+        daysPer100m2: 3.5,
+        matLabel: 'FIFA turf + drainage base'
+      },
+      'rezina-maydon': {
+        title: 'EPDM/SBR rubber playground surfacing',
+        basePrice: 180000,
+        rollSize: 25,
+        daysPer100m2: 1.8,
+        matLabel: 'EPDM/SBR granules + PU resin'
+      },
+      'avtopoliv-landshaft': {
+        title: 'Landscape design + Hunter irrigation',
+        basePrice: 49000,
+        rollSize: 15,
+        daysPer100m2: 2.2,
+        matLabel: 'Hunter USA nozzles & valves'
+      }
+    },
+    zh: {
+      'suniy-gazon': {
+        title: '人造草坪（草高 20–50 毫米）',
+        basePrice: 89000,
+        rollSize: 50,
+        daysPer100m2: 1,
+        matLabel: '标准草卷数量 (2×25米)'
+      },
+      'rulonli-gazon': {
+        title: '天然草卷 + 专业铺设施工',
+        basePrice: 35000,
+        rollSize: 0.8,
+        daysPer100m2: 1.5,
+        matLabel: '天然草卷块数 (0.8m²/块)'
+      },
+      'gazon-ekish': {
+        title: '草籽播种与土壤改良平整',
+        basePrice: 20000,
+        rollSize: 25,
+        daysPer100m2: 2,
+        matLabel: '丹麦进口草籽包数 (10kg/袋)'
+      },
+      'stadion-qurish': {
+        title: '五人制足球场/网球场一站式建设',
+        basePrice: 217000,
+        rollSize: 100,
+        daysPer100m2: 3.5,
+        matLabel: 'FIFA草坪与透水碎石基层'
+      },
+      'rezina-maydon': {
+        title: '儿童乐园EPDM/SBR无缝橡胶地坪',
+        basePrice: 180000,
+        rollSize: 25,
+        daysPer100m2: 1.8,
+        matLabel: 'EPDM环保颗粒及高品质胶水'
+      },
+      'avtopoliv-landshaft': {
+        title: '园林景观设计 + Hunter智能喷灌',
+        basePrice: 49000,
+        rollSize: 15,
+        daysPer100m2: 2.2,
+        matLabel: '美国Hunter喷嘴及电磁阀组'
+      }
     }
   };
 
@@ -274,6 +364,10 @@ function initSmartCalculator() {
         areaDisplay.textContent = `${area.toLocaleString('ru-RU')} м² (${sotix} сотки)`;
       } else if (pageLang === 'uz-Cyrl') {
         areaDisplay.textContent = `${area.toLocaleString('ru-RU')} м² (${sotix} сотих)`;
+      } else if (pageLang === 'en') {
+        areaDisplay.textContent = `${area.toLocaleString('en-US')} m² (${(area * 10.7639).toFixed(0)} sq.ft)`;
+      } else if (pageLang === 'zh') {
+        areaDisplay.textContent = `${area.toLocaleString('zh-CN')} 平方米 (${(area * 0.0015).toFixed(2)} 亩)`;
       } else {
         areaDisplay.textContent = `${area.toLocaleString('ru-RU')} m² (${sotix} sotix)`;
       }
@@ -299,6 +393,16 @@ function initSmartCalculator() {
       if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} м²`;
       if (outRolls) outRolls.textContent = `${rolls} бирлик / тўплам`;
       if (outDays) outDays.textContent = `${days} – ${days + 2} кун`;
+    } else if (pageLang === 'en') {
+      if (outTotal) outTotal.textContent = `${total.toLocaleString('en-US')} UZS`;
+      if (outArea) outArea.textContent = `${area.toLocaleString('en-US')} m²`;
+      if (outRolls) outRolls.textContent = `${rolls} units / sets`;
+      if (outDays) outDays.textContent = `${days} – ${days + 2} days`;
+    } else if (pageLang === 'zh') {
+      if (outTotal) outTotal.textContent = `${total.toLocaleString('zh-CN')} 索姆`;
+      if (outArea) outArea.textContent = `${area.toLocaleString('zh-CN')} 平方米`;
+      if (outRolls) outRolls.textContent = `${rolls} 套/件`;
+      if (outDays) outDays.textContent = `${days} – ${days + 2} 天`;
     } else {
       if (outTotal) outTotal.textContent = `${total.toLocaleString('ru-RU')} so'm`;
       if (outArea) outArea.textContent = `${area.toLocaleString('ru-RU')} m²`;
@@ -358,6 +462,14 @@ function initEcommerceCatalog() {
         } else if (pageLang === 'uz-Cyrl') {
           priceEl.innerHTML = `${val.toLocaleString('ru-RU')} сўм/${unit} <small class="js-price-note">${
             priceMode === 'wholesale' ? 'Оптом (1-қўлдан)' : 'Чакана нарх'
+          }</small>`;
+        } else if (pageLang === 'en') {
+          priceEl.innerHTML = `${val.toLocaleString('en-US')} UZS/${unit} <small class="js-price-note">${
+            priceMode === 'wholesale' ? 'Wholesale (direct)' : 'Retail price'
+          }</small>`;
+        } else if (pageLang === 'zh') {
+          priceEl.innerHTML = `${val.toLocaleString('zh-CN')} 索姆/${unit} <small class="js-price-note">${
+            priceMode === 'wholesale' ? '厂家一手批发价' : '零售参考价'
           }</small>`;
         } else {
           priceEl.innerHTML = `${val.toLocaleString('ru-RU')} so'm/${unit} <small class="js-price-note">${
@@ -475,6 +587,10 @@ function initPhoneOnlyForms() {
           showToast('Пожалуйста, введите полный номер телефона: +998 (XX) XXX-XX-XX');
         } else if (pageLang === 'uz-Cyrl') {
           showToast('Илтимос, тўлиқ телефон рақамингизни киритинг: +998 (XX) XXX-XX-XX');
+        } else if (pageLang === 'en') {
+          showToast('Please enter a complete phone number: +998 (XX) XXX-XX-XX');
+        } else if (pageLang === 'zh') {
+          showToast('请输入完整的电话号码：+998 (XX) XXX-XX-XX');
         } else {
           showToast("Iltimos, to'liq telefon raqamingizni kiriting: +998 (XX) XXX-XX-XX");
         }
@@ -487,6 +603,10 @@ function initPhoneOnlyForms() {
         showToast(`Спасибо! Номер ${telInput.value} принят (${context}). Наш специалист свяжется с вами в течение 15 минут!`);
       } else if (pageLang === 'uz-Cyrl') {
         showToast(`Раҳмат! ${telInput.value} рақами қабул қилинди (${context}). Мутахассисимиз 15 дақиқа ичида боғланади!`);
+      } else if (pageLang === 'en') {
+        showToast(`Thank you! Phone ${telInput.value} registered (${context}). Our specialist will contact you within 15 minutes!`);
+      } else if (pageLang === 'zh') {
+        showToast(`感谢您的提交！电话号码 ${telInput.value} 已登记 (${context})。专员将在15分钟内致电联系！`);
       } else {
         showToast(`Rahmat! ${telInput.value} raqami qabul qilindi (${context}). Mutaxassisimiz 15 daqiqa ichida bog'lanadi!`);
       }
@@ -518,12 +638,20 @@ function initQuickModal() {
           ? 'Бесплатная консультация и замер'
           : pageLang === 'uz-Cyrl'
           ? 'Бепул консультация ва ўлчов'
+          : pageLang === 'en'
+          ? 'Free Consultation & Measurement'
+          : pageLang === 'zh'
+          ? '免费咨询与现场测量'
           : "Bepul konsultatsiya va o'lchov";
       const defaultSub =
         pageLang === 'ru'
           ? 'Оставьте ваш номер телефона — свяжемся за 15 минут и рассчитаем точную смету.'
           : pageLang === 'uz-Cyrl'
           ? 'Фақат телефон рақамингизни қолдиринг — 15 дақиқада боғланиб, аниқ смета берамиз.'
+          : pageLang === 'en'
+          ? 'Leave your phone number — our specialist will call back in 15 minutes.'
+          : pageLang === 'zh'
+          ? '留下您的联系电话，我们的工程师将在15分钟内与您联系。'
           : "Faqat telefon raqamingizni qoldiring — 15 daqiqada bog'lanib, aniq smeta beramiz.";
       const title = btn.dataset.title || defaultTitle;
       const sub = btn.dataset.sub || defaultSub;
