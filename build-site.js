@@ -492,14 +492,51 @@ const BLOG_POSTS = [
 ];
 
 /* ==========================================================================
+   ROUTE MAP & MULTI-LANGUAGE URL MAPPINGS (UZ / UZ-KR / RU)
+   ========================================================================== */
+const ROUTE_MAP = [
+  { id: 'home', uz: '/', 'uz-kr': '/uz-kr/', ru: '/ru/' },
+  { id: 'katalog', uz: '/katalog/', 'uz-kr': '/uz-kr/katalog/', ru: '/ru/katalog/' },
+  { id: 'katalog-suniy', uz: '/katalog/suniy-gazon/', 'uz-kr': '/uz-kr/katalog/suniy-gazon/', ru: '/ru/katalog/iskusstvennyy-gazon/' },
+  { id: 'katalog-rulonli', uz: '/katalog/rulonli-gazon/', 'uz-kr': '/uz-kr/katalog/rulonli-gazon/', ru: '/ru/katalog/rulonnyy-gazon/' },
+  { id: 'service-gazon', uz: '/xizmatlar/gazon-ekish-va-yotqizish/', 'uz-kr': '/uz-kr/xizmatlar/gazon-ekish-va-yotqizish/', ru: '/ru/uslugi/ukladka-i-posev-gazona/' },
+  { id: 'service-stadion', uz: '/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/', 'uz-kr': '/uz-kr/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/', ru: '/ru/uslugi/stroitelstvo-futbolnyh-poley-i-kortov/' },
+  { id: 'service-rezina', uz: '/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/', 'uz-kr': '/uz-kr/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/', ru: '/ru/uslugi/rezinovye-pokrytiya-i-detskie-ploshchadki/' },
+  { id: 'service-landshaft', uz: '/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/', 'uz-kr': '/uz-kr/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/', ru: '/ru/uslugi/landshaftnyy-dizayn-i-ozelenenie/' },
+  { id: 'service-avtopoliv', uz: '/xizmatlar/avtomatik-sugorish-tizimi/', 'uz-kr': '/uz-kr/xizmatlar/avtomatik-sugorish-tizimi/', ru: '/ru/uslugi/avtomaticheskiy-poliv-hunter/' },
+  { id: 'service-fitodekor', uz: '/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/', 'uz-kr': '/uz-kr/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/', ru: '/ru/uslugi/vertikalnoe-ozelenenie-fitodekor/' },
+  { id: 'region-samarkand', uz: '/samarkand/', 'uz-kr': '/uz-kr/samarkand/', ru: '/ru/samarkand/' },
+  { id: 'region-fergana', uz: '/fergana/', 'uz-kr': '/uz-kr/fergana/', ru: '/ru/fergana/' },
+  { id: 'region-andijan', uz: '/andijan/', 'uz-kr': '/uz-kr/andijan/', ru: '/ru/andizhan/' },
+  { id: 'region-bukhara', uz: '/bukhara/', 'uz-kr': '/uz-kr/bukhara/', ru: '/ru/buhara/' },
+  { id: 'region-kashkadarya', uz: '/kashkadarya/', 'uz-kr': '/uz-kr/kashkadarya/', ru: '/ru/kashkadarya/' },
+  { id: 'region-namangan', uz: '/namangan/', 'uz-kr': '/uz-kr/namangan/', ru: '/ru/namangan/' },
+  { id: 'about', uz: '/biz-haqimizda/', 'uz-kr': '/uz-kr/biz-haqimizda/', ru: '/ru/o-nas/' },
+  { id: 'blog', uz: '/blog/', 'uz-kr': '/uz-kr/blog/', ru: '/ru/blog/' },
+  { id: 'contact', uz: '/boglanish/', 'uz-kr': '/uz-kr/boglanish/', ru: '/ru/kontakty/' }
+];
+
+function getRoute(pathOrUrl) {
+  if (!pathOrUrl) return ROUTE_MAP[0];
+  const p = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
+  const norm = p.endsWith('/') ? p : `${p}/`;
+  return ROUTE_MAP.find((r) => r.uz === norm || r['uz-kr'] === norm || r.ru === norm) || {
+    uz: norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/',
+    'uz-kr': `/uz-kr${norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/'}`,
+    ru: `/ru${norm.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/'}`
+  };
+}
+
+/* ==========================================================================
    SHARED HTML COMPONENTS
    ========================================================================== */
 function renderHead({ title, description, keywords, canonicalPath, schemaJson, lang = 'uz', basePath }) {
-  const cleanBase = basePath || canonicalPath.replace(/^\/(uz-kr|ru)(?=\/|$)/, '') || '/';
+  const currentPath = canonicalPath || basePath || '/';
+  const route = getRoute(basePath || currentPath);
   const canonicalUrl = `${BRAND.domain}${canonicalPath}`;
-  const uzUrl = `${BRAND.domain}${cleanBase}`;
-  const uzKrUrl = `${BRAND.domain}/uz-kr${cleanBase === '/' ? '/' : cleanBase}`;
-  const ruUrl = `${BRAND.domain}/ru${cleanBase === '/' ? '/' : cleanBase}`;
+  const uzUrl = `${BRAND.domain}${route.uz}`;
+  const uzKrUrl = `${BRAND.domain}${route['uz-kr']}`;
+  const ruUrl = `${BRAND.domain}${route.ru}`;
   const ogLocale = lang === 'ru' ? 'ru_RU' : 'uz_UZ';
 
   return `<!DOCTYPE html>
@@ -553,9 +590,10 @@ function renderHeader(activePath = '/') {
   const isBlogActive = activePath.startsWith('/blog');
   const isContactActive = activePath.startsWith('/boglanish');
 
-  const uzHref = activePath;
-  const uzKrHref = `/uz-kr${activePath === '/' ? '/' : activePath}`;
-  const ruHref = `/ru${activePath === '/' ? '/' : activePath}`;
+  const route = getRoute(activePath);
+  const uzHref = route.uz;
+  const uzKrHref = route['uz-kr'];
+  const ruHref = route.ru;
 
   return `
   <!-- COMPACT STICKY HEADER (Without "Bosh sahifa", Clean Minimalist Submenu) -->
@@ -2169,8 +2207,8 @@ const BRAND_RU = {
 
 const SERVICES_RU = [
   {
-    slug: 'gazon-ekish-va-yotqizish',
-    url: '/ru/xizmatlar/gazon-ekish-va-yotqizish/',
+    slug: 'ukladka-i-posev-gazona',
+    url: '/ru/uslugi/ukladka-i-posev-gazona/',
     baseUrl: '/xizmatlar/gazon-ekish-va-yotqizish/',
     svgIcon: ICONS.leaf,
     shortName: 'Укладка и посев газона',
@@ -2212,8 +2250,8 @@ const SERVICES_RU = [
     ]
   },
   {
-    slug: 'futbol-maydonlari-va-tennis-kortlari-qurish',
-    url: '/ru/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/',
+    slug: 'stroitelstvo-futbolnyh-poley-i-kortov',
+    url: '/ru/uslugi/stroitelstvo-futbolnyh-poley-i-kortov/',
     baseUrl: '/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/',
     svgIcon: ICONS.stadium,
     shortName: 'Строительство полей и кортов',
@@ -2255,8 +2293,8 @@ const SERVICES_RU = [
     ]
   },
   {
-    slug: 'rezina-qoplama-va-bolalar-maydonchalari',
-    url: '/ru/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/',
+    slug: 'rezinovye-pokrytiya-i-detskie-ploshchadki',
+    url: '/ru/uslugi/rezinovye-pokrytiya-i-detskie-ploshchadki/',
     baseUrl: '/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/',
     svgIcon: ICONS.shield,
     shortName: 'Детские и резиновые площадки',
@@ -2298,8 +2336,8 @@ const SERVICES_RU = [
     ]
   },
   {
-    slug: 'landshaft-dizayn-va-kokalamzorlashtirish',
-    url: '/ru/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/',
+    slug: 'landshaftnyy-dizayn-i-ozelenenie',
+    url: '/ru/uslugi/landshaftnyy-dizayn-i-ozelenenie/',
     baseUrl: '/xizmatlar/landshaft-dizayn-va-kokalamzorlashtirish/',
     svgIcon: ICONS.layers,
     shortName: 'Ландшафтный дизайн 3D',
@@ -2340,8 +2378,8 @@ const SERVICES_RU = [
     ]
   },
   {
-    slug: 'avtomatik-sugorish-tizimi',
-    url: '/ru/xizmatlar/avtomatik-sugorish-tizimi/',
+    slug: 'avtomaticheskiy-poliv-hunter',
+    url: '/ru/uslugi/avtomaticheskiy-poliv-hunter/',
     baseUrl: '/xizmatlar/avtomatik-sugorish-tizimi/',
     svgIcon: ICONS.droplet,
     shortName: 'Автополив Hunter',
@@ -2383,8 +2421,8 @@ const SERVICES_RU = [
     ]
   },
   {
-    slug: 'vertikal-kokalamzorlashtirish-fitodekor',
-    url: '/ru/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/',
+    slug: 'vertikalnoe-ozelenenie-fitodekor',
+    url: '/ru/uslugi/vertikalnoe-ozelenenie-fitodekor/',
     baseUrl: '/xizmatlar/vertikal-kokalamzorlashtirish-fitodekor/',
     svgIcon: ICONS.grid,
     shortName: 'Фитодекор и зеленые стены',
@@ -2557,8 +2595,8 @@ const REGIONS_RU = [
     desc: 'Поставка искусственной травы и спортивного газона FIFA по Ферганской долине оптом из первых рук и строительство спортивных площадок под ключ.'
   },
   {
-    slug: 'andijan',
-    url: '/ru/andijan/',
+    slug: 'andizhan',
+    url: '/ru/andizhan/',
     baseUrl: '/andijan/',
     name: 'Андижан',
     locative: 'В Андижане',
@@ -2568,8 +2606,8 @@ const REGIONS_RU = [
     desc: 'Строительство мини-футбольных стадионов, теннисных кортов, укладка бесшовного резинового покрытия EPDM и доставка газона в Андижанскую область.'
   },
   {
-    slug: 'bukhara',
-    url: '/ru/bukhara/',
+    slug: 'buhara',
+    url: '/ru/buhara/',
     baseUrl: '/bukhara/',
     name: 'Бухара',
     locative: 'В Бухаре',
@@ -2610,7 +2648,7 @@ const BLOG_POSTS_RU = [
     category: 'Уход за газоном',
     img: 'https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=900&q=80',
     excerpt: 'Как правильно выбрать между рулонным и посевным газоном исходя из бюджета, сроков и особенностей почвы вашего участка.',
-    link: '/ru/xizmatlar/gazon-ekish-va-yotqizish/'
+    link: '/ru/uslugi/ukladka-i-posev-gazona/'
   },
   {
     slug: 'mini-futbol-stadioni-qurish-biznes-rejasi',
@@ -2619,7 +2657,7 @@ const BLOG_POSTS_RU = [
     category: 'Строительство стадионов',
     img: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=900&q=80',
     excerpt: 'Подробный разбор этапов строительства стадиона под ключ в Ташкенте и областях: дренаж, трава FIFA 50 мм, сетка и LED освещение.',
-    link: '/ru/xizmatlar/futbol-maydonlari-va-tennis-kortlari-qurish/'
+    link: '/ru/uslugi/stroitelstvo-futbolnyh-poley-i-kortov/'
   },
   {
     slug: 'bolalar-maydonchasi-uchun-epdm-yoki-sbr-rezina',
@@ -2628,20 +2666,21 @@ const BLOG_POSTS_RU = [
     category: 'Резиновые покрытия',
     img: 'https://images.unsplash.com/photo-1575783970733-1aaedde1db74?auto=format&fit=crop&w=900&q=80',
     excerpt: 'Какую толщину бесшовного каучукового покрытия выбрать для детского сада, школы или двора жилого комплекса?',
-    link: '/ru/xizmatlar/rezina-qoplama-va-bolalar-maydonchalari/'
+    link: '/ru/uslugi/rezinovye-pokrytiya-i-detskie-ploshchadki/'
   }
 ];
 
-function renderHeaderRu(basePath = '/') {
-  const isServiceActive = basePath.startsWith('/xizmatlar');
-  const isShopActive = basePath.startsWith('/katalog');
-  const isAboutActive = basePath.startsWith('/biz-haqimizda');
-  const isBlogActive = basePath.startsWith('/blog');
-  const isContactActive = basePath.startsWith('/boglanish');
+function renderHeaderRu(basePath = '/ru/') {
+  const route = getRoute(basePath);
+  const isServiceActive = basePath.startsWith('/ru/uslugi') || basePath.startsWith('/xizmatlar');
+  const isShopActive = basePath.startsWith('/ru/katalog') || basePath.startsWith('/katalog');
+  const isAboutActive = basePath.startsWith('/ru/o-nas') || basePath.startsWith('/biz-haqimizda');
+  const isBlogActive = basePath.startsWith('/ru/blog') || basePath.startsWith('/blog');
+  const isContactActive = basePath.startsWith('/ru/kontakty') || basePath.startsWith('/boglanish');
 
-  const uzHref = basePath;
-  const uzKrHref = `/uz-kr${basePath === '/' ? '/' : basePath}`;
-  const ruHref = `/ru${basePath === '/' ? '/' : basePath}`;
+  const uzHref = route.uz;
+  const uzKrHref = route['uz-kr'];
+  const ruHref = route.ru;
 
   return `
   <!-- COMPACT STICKY HEADER (Russian) -->
@@ -2679,7 +2718,7 @@ function renderHeaderRu(basePath = '/') {
         </div>
 
         <div class="nav-item">
-          <a href="/ru/biz-haqimizda/" class="nav-link ${isAboutActive ? 'active' : ''}">О компании</a>
+          <a href="/ru/o-nas/" class="nav-link ${isAboutActive ? 'active' : ''}">О компании</a>
         </div>
 
         <div class="nav-item">
@@ -2687,7 +2726,7 @@ function renderHeaderRu(basePath = '/') {
         </div>
 
         <div class="nav-item">
-          <a href="/ru/boglanish/" class="nav-link ${isContactActive ? 'active' : ''}">Контакты</a>
+          <a href="/ru/kontakty/" class="nav-link ${isContactActive ? 'active' : ''}">Контакты</a>
         </div>
       </nav>
 
@@ -3165,11 +3204,11 @@ function renderFooterRu() {
           <h4>Магазин и разделы</h4>
           <div class="footer-links">
             <a href="/ru/katalog/">Магазин (все товары)</a>
-            <a href="/ru/katalog/suniy-gazon/">Каталог искусственного газона</a>
-            <a href="/ru/katalog/rulonli-gazon/">Натуральный рулонный газон</a>
-            <a href="/ru/biz-haqimizda/">О компании</a>
+            <a href="/ru/katalog/iskusstvennyy-gazon/">Каталог искусственного газона</a>
+            <a href="/ru/katalog/rulonnyy-gazon/">Натуральный рулонный газон</a>
+            <a href="/ru/o-nas/">О компании</a>
             <a href="/ru/blog/">Блог</a>
-            <a href="/ru/boglanish/">Контакты</a>
+            <a href="/ru/kontakty/">Контакты</a>
           </div>
         </div>
 
@@ -3479,8 +3518,7 @@ function buildHomePageRu() {
   ${renderFooterRu()}`;
 }
 
-function buildCatalogPageRu({ basePath = '/katalog/', title, metaDesc, h1, subtitle, defaultFilter = 'all' }) {
-  const canonicalPath = `/ru${basePath}`;
+function buildCatalogPageRu({ canonicalPath = '/ru/katalog/', basePath = '/katalog/', title, metaDesc, h1, subtitle, defaultFilter = 'all' }) {
   const schemaJson = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -3498,14 +3536,14 @@ function buildCatalogPageRu({ basePath = '/katalog/', title, metaDesc, h1, subti
     schemaJson
   })}
 <body>
-  ${renderHeaderRu(basePath)}
+  ${renderHeaderRu(canonicalPath)}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
       <a href="/ru/">Главная</a>
       <span>/</span>
       <a href="/ru/katalog/">Магазин</a>
-      ${basePath !== '/katalog/' ? `<span>/</span><span style="color:var(--green-800);">${h1}</span>` : ''}
+      ${canonicalPath !== '/ru/katalog/' ? `<span>/</span><span style="color:var(--green-800);">${h1}</span>` : ''}
     </nav>
 
     <section class="unified-hero-section">
@@ -3518,11 +3556,11 @@ function buildCatalogPageRu({ basePath = '/katalog/', title, metaDesc, h1, subti
           <h1>${h1}</h1>
           <p class="unified-hero-lead">${subtitle}</p>
           <div class="hero-action-btns">
-            <a href="/ru/katalog/suniy-gazon/" class="btn-primary-white">
+            <a href="/ru/katalog/iskusstvennyy-gazon/" class="btn-primary-white">
               <span>Каталог искусственного газона</span>
               <span class="btn-arrow-icon right">${ICONS.arrowRight}</span>
             </a>
-            <a href="/ru/katalog/rulonli-gazon/" class="btn-secondary-glass">
+            <a href="/ru/katalog/rulonnyy-gazon/" class="btn-secondary-glass">
               <span>Натуральный рулонный газон</span>
               <span class="btn-arrow-icon right">${ICONS.arrowRight}</span>
             </a>
@@ -3605,7 +3643,7 @@ function buildServicePageRu(service) {
     ]
   };
 
-  const isRubberPage = service.slug === 'rezina-qoplama-va-bolalar-maydonchalari';
+  const isRubberPage = service.slug === 'rezinovye-pokrytiya-i-detskie-ploshchadki' || service.slug === 'rezina-qoplama-va-bolalar-maydonchalari';
 
   const rubberConstructorHtml = isRubberPage
     ? `
@@ -3654,7 +3692,7 @@ function buildServicePageRu(service) {
     schemaJson
   })}
 <body>
-  ${renderHeaderRu(service.baseUrl)}
+  ${renderHeaderRu(service.url)}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
@@ -3798,7 +3836,7 @@ function buildRegionPageRu(region) {
     schemaJson
   })}
 <body>
-  ${renderHeaderRu(region.baseUrl)}
+  ${renderHeaderRu(region.url)}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
@@ -3867,20 +3905,20 @@ function buildAboutPageRu() {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
     name: 'О компании — Eco Landshaft',
-    url: `${BRAND.domain}/ru/biz-haqimizda/`
+    url: `${BRAND.domain}/ru/o-nas/`
   };
 
   return `${renderHead({
     title: 'О компании Eco Landshaft | 10 лет опыта в озеленении и строительстве стадионов',
     description: 'Eco Landshaft (ecolandshaft.uz) — ведущая компания в Узбекистане по укладке газона, оптовой продаже искусственного и рулонного газона, строительству футбольных полей и детских площадок.',
     keywords: 'о компании eco landshaft, компания по озеленению ташкент, строительство стадионов узбекистан, питомник рулонного газона',
-    canonicalPath: '/ru/biz-haqimizda/',
+    canonicalPath: '/ru/o-nas/',
     basePath: '/biz-haqimizda/',
     lang: 'ru',
     schemaJson
   })}
 <body>
-  ${renderHeaderRu('/biz-haqimizda/')}
+  ${renderHeaderRu('/ru/o-nas/')}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
@@ -3965,7 +4003,7 @@ function buildBlogPageRu() {
     schemaJson
   })}
 <body>
-  ${renderHeaderRu('/blog/')}
+  ${renderHeaderRu('/ru/blog/')}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
@@ -4022,20 +4060,20 @@ function buildContactPageRu() {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
     name: 'Контакты — Eco Landshaft',
-    url: `${BRAND.domain}/ru/boglanish/`
+    url: `${BRAND.domain}/ru/kontakty/`
   };
 
   return `${renderHead({
     title: 'Контакты и адрес: г. Ташкент, ул. Самарканд Дарвоза, дом 2 | Eco Landshaft',
     description: 'Связаться с офисом Eco Landshaft в Ташкенте: +998-97-783-8253, Telegram t.me/+998977838253. Бесплатная консультация и вызов замерщика на объект.',
     keywords: 'контакты eco landshaft, самарканд дарвоза 2, телефон газоны ташкент, бесплатная консультация озеленение',
-    canonicalPath: '/ru/boglanish/',
+    canonicalPath: '/ru/kontakty/',
     basePath: '/boglanish/',
     lang: 'ru',
     schemaJson
   })}
 <body>
-  ${renderHeaderRu('/boglanish/')}
+  ${renderHeaderRu('/ru/kontakty/')}
 
   <main class="container">
     <nav class="breadcrumb-bar" aria-label="Breadcrumb">
@@ -4062,123 +4100,151 @@ function writePage(relPath, htmlContent) {
   console.log(`Generated: ${relPath}`);
 }
 
-function writeLocalizedPair(baseRelFile, basePath, uzHtml, ruHtml) {
-  // 1. Default Uzbek Latin at root
-  writePage(baseRelFile, uzHtml);
-  // 2. Uzbek Cyrillic under /uz-kr/
-  writePage(`uz-kr/${baseRelFile}`, convertUzHtmlToUzKr(uzHtml, basePath));
-  // 3. Russian under /ru/
-  writePage(`ru/${baseRelFile}`, ruHtml);
-}
-
 function buildAll() {
-  const basePaths = [];
+  // 0. Clean up obsolete Russian directories if they exist
+  const obsoleteRuDirs = [
+    'ru/biz-haqimizda',
+    'ru/boglanish',
+    'ru/xizmatlar',
+    'ru/andijan',
+    'ru/bukhara',
+    'ru/katalog/suniy-gazon',
+    'ru/katalog/rulonli-gazon'
+  ];
+  obsoleteRuDirs.forEach((relDir) => {
+    const p = path.join(ROOT_DIR, relDir);
+    if (fs.existsSync(p)) {
+      fs.rmSync(p, { recursive: true, force: true });
+      console.log(`Cleaned up obsolete directory: ${relDir}`);
+    }
+  });
 
   // 1. Home page
-  writeLocalizedPair('index.html', '/', buildHomePage(), buildHomePageRu());
-  basePaths.push('/');
+  const homeUzHtml = buildHomePage();
+  const homeRuHtml = buildHomePageRu();
+  writePage('index.html', homeUzHtml);
+  writePage('uz-kr/index.html', convertUzHtmlToUzKr(homeUzHtml, '/'));
+  writePage('ru/index.html', homeRuHtml);
 
   // 2. Catalog main
-  writeLocalizedPair(
-    'katalog/index.html',
-    '/katalog/',
-    buildCatalogPage({
-      subpath: '/katalog/',
-      title: "Sun'iy va rulonli gazon do'koni — optom va chakana narxlar Toshkentda | Eco Landshaft",
-      metaDesc: "Ulgurji (optom) va chakana narxda sun'iy gazon (10mm–50mm), tabiiy rulonli gazon, Daniya urug'lari va EPDM rezina qoplamalar do'koni.",
-      h1: "Sun'iy va tabiiy (rulonli) gazon do'koni",
-      subtitle: "10 mm dan 50 mm gacha landshaft va FIFA sport chimi, pitomnikdan yangi kesilgan rulonli gazon hamda DLF Daniya urug'lari.",
-      defaultFilter: 'all'
-    }),
-    buildCatalogPageRu({
-      basePath: '/katalog/',
-      title: 'Магазин искусственного и рулонного газона в Ташкенте — цены оптом и в розницу | Eco Landshaft',
-      metaDesc: 'Оптовая и розничная продажа искусственного газона (10–50 мм), натурального рулонного газона из питомника, датских семян DLF и резиновых покрытий EPDM.',
-      h1: 'Магазин искусственного и натурального (рулонного) газона',
-      subtitle: 'Ландшафтная и спортивная трава FIFA от 10 до 50 мм, свежесрезанный рулонный газон из питомника и оригинальные семена DLF (Дания).',
-      defaultFilter: 'all'
-    })
-  );
-  basePaths.push('/katalog/');
+  const catUzHtml = buildCatalogPage({
+    subpath: '/katalog/',
+    title: "Sun'iy va rulonli gazon do'koni — optom va chakana narxlar Toshkentda | Eco Landshaft",
+    metaDesc: "Ulgurji (optom) va chakana narxda sun'iy gazon (10mm–50mm), tabiiy rulonli gazon, Daniya urug'lari va EPDM rezina qoplamalar do'koni.",
+    h1: "Sun'iy va tabiiy (rulonli) gazon do'koni",
+    subtitle: "10 mm dan 50 mm gacha landshaft va FIFA sport chimi, pitomnikdan yangi kesilgan rulonli gazon hamda DLF Daniya urug'lari.",
+    defaultFilter: 'all'
+  });
+  const catRuHtml = buildCatalogPageRu({
+    canonicalPath: '/ru/katalog/',
+    basePath: '/katalog/',
+    title: 'Магазин искусственного и рулонного газона в Ташкенте — цены оптом и в розницу | Eco Landshaft',
+    metaDesc: 'Оптовая и розничная продажа искусственного газона (10–50 мм), натурального рулонного газона из питомника, датских семян DLF и резиновых покрытий EPDM.',
+    h1: 'Магазин искусственного и натурального (рулонного) газона',
+    subtitle: 'Ландшафтная и спортивная трава FIFA от 10 до 50 мм, свежесрезанный рулонный газон из питомника и оригинальные семена DLF (Дания).',
+    defaultFilter: 'all'
+  });
+  writePage('katalog/index.html', catUzHtml);
+  writePage('uz-kr/katalog/index.html', convertUzHtmlToUzKr(catUzHtml, '/katalog/'));
+  writePage('ru/katalog/index.html', catRuHtml);
 
-  // 3. Catalog: Sun'iy gazon
-  writeLocalizedPair(
-    'katalog/suniy-gazon/index.html',
-    '/katalog/suniy-gazon/',
-    buildCatalogPage({
-      subpath: '/katalog/suniy-gazon/',
-      title: "Sun'iy gazon Toshkentda — optom va chakana sotib olish (48 800 so'm/m² dan) | Eco Landshaft",
-      metaDesc: "Hovli, kafe, ofis va futbol stadionlari uchun 10mm, 20mm, 30mm, 40mm va 50mm sun'iy gazon (sun'iy chim) optom va chakana narxda.",
-      h1: "Sun'iy gazon katalogi (10 mm – 50 mm)",
-      subtitle: "Landshaft, hovli, restoran va FIFA mini-futbol maydonlari uchun quyoshda o'chmaydigan sertifikatlangan sun'iy chimlar.",
-      defaultFilter: 'suniy'
-    }),
-    buildCatalogPageRu({
-      basePath: '/katalog/suniy-gazon/',
-      title: 'Искусственный газон в Ташкенте — купить оптом и в розницу (от 48 800 сум/м²) | Eco Landshaft',
-      metaDesc: 'Купить искусственный газон (искусственную траву) 10 мм, 20 мм, 30 мм, 40 мм и 50 мм для дома, кафе, офиса и футбольных стадионов оптом из первых рук.',
-      h1: 'Каталог искусственного газона (10 мм – 50 мм)',
-      subtitle: 'Сертифицированная искусственная трава с УФ-защитой для ландшафта, террас, ресторанов и мини-футбольных полей стандарта FIFA.',
-      defaultFilter: 'suniy'
-    })
-  );
-  basePaths.push('/katalog/suniy-gazon/');
+  // 3. Catalog: Sun'iy gazon / Искусственный газон
+  const suniyUzHtml = buildCatalogPage({
+    subpath: '/katalog/suniy-gazon/',
+    title: "Sun'iy gazon Toshkentda — optom va chakana sotib olish (48 800 so'm/m² dan) | Eco Landshaft",
+    metaDesc: "Hovli, kafe, ofis va futbol stadionlari uchun 10mm, 20mm, 30mm, 40mm va 50mm sun'iy gazon (sun'iy chim) optom va chakana narxda.",
+    h1: "Sun'iy gazon katalogi (10 mm – 50 mm)",
+    subtitle: "Landshaft, hovli, restoran va FIFA mini-futbol maydonlari uchun quyoshda o'chmaydigan sertifikatlangan sun'iy chimlar.",
+    defaultFilter: 'suniy'
+  });
+  const suniyRuHtml = buildCatalogPageRu({
+    canonicalPath: '/ru/katalog/iskusstvennyy-gazon/',
+    basePath: '/katalog/suniy-gazon/',
+    title: 'Искусственный газон в Ташкенте — купить оптом и в розницу (от 48 800 сум/м²) | Eco Landshaft',
+    metaDesc: 'Купить искусственный газон (искусственную траву) 10 мм, 20 мм, 30 мм, 40 мм и 50 мм для дома, кафе, офиса и футбольных стадионов оптом из первых рук.',
+    h1: 'Каталог искусственного газона (10 мм – 50 мм)',
+    subtitle: 'Сертифицированная искусственная трава с УФ-защитой для ландшафта, террас, ресторанов и мини-футбольных полей стандарта FIFA.',
+    defaultFilter: 'suniy'
+  });
+  writePage('katalog/suniy-gazon/index.html', suniyUzHtml);
+  writePage('uz-kr/katalog/suniy-gazon/index.html', convertUzHtmlToUzKr(suniyUzHtml, '/katalog/suniy-gazon/'));
+  writePage('ru/katalog/iskusstvennyy-gazon/index.html', suniyRuHtml);
 
-  // 4. Catalog: Rulonli gazon
-  writeLocalizedPair(
-    'katalog/rulonli-gazon/index.html',
-    '/katalog/rulonli-gazon/',
-    buildCatalogPage({
-      subpath: '/katalog/rulonli-gazon/',
-      title: 'Rulonli gazon narxlari Toshkentda — pitomnikdan tabiiy tayyor gazon | Eco Landshaft',
-      metaDesc: "Toshkent pitomnigidan bugun kesilgan 100% tabiiy rulonli gazon (tayyor chim) sotish va yotqizish. 9 000 – 30 000 so'm/m².",
-      h1: 'Tabiiy rulonli gazon — pitomnikdan tayyor chim',
-      subtitle: 'Zich ildiz tizimiga ega 2 yillik tayyor rulonli gazon: hovlingiz 1 kunda zumraddek yashil gilamga aylanadi.',
-      defaultFilter: 'rulonli'
-    }),
-    buildCatalogPageRu({
-      basePath: '/katalog/rulonli-gazon/',
-      title: 'Рулонный газон в Ташкенте — купить натуральный готовый газон из питомника | Eco Landshaft',
-      metaDesc: 'Продажа и укладка свежесрезанного 100% натурального рулонного газона из собственного питомника в Ташкенте. Цена от 9 000 до 30 000 сум/м².',
-      h1: 'Натуральный рулонный газон — готовый дерн из питомника',
-      subtitle: 'Двухлетний плотный рулонный газон с мощной корневой системой: ваш участок превратится в изумрудный ковер всего за 1 день.',
-      defaultFilter: 'rulonli'
-    })
-  );
-  basePaths.push('/katalog/rulonli-gazon/');
+  // 4. Catalog: Rulonli gazon / Натуральный рулонный газон
+  const rulonliUzHtml = buildCatalogPage({
+    subpath: '/katalog/rulonli-gazon/',
+    title: 'Rulonli gazon narxlari Toshkentda — pitomnikdan tabiiy tayyor gazon | Eco Landshaft',
+    metaDesc: "Toshkent pitomnigidan bugun kesilgan 100% tabiiy rulonli gazon (tayyor chim) sotish va yotqizish. 9 000 – 30 000 so'm/m².",
+    h1: 'Tabiiy rulonli gazon — pitomnikdan tayyor chim',
+    subtitle: 'Zich ildiz tizimiga ega 2 yillik tayyor rulonli gazon: hovlingiz 1 kunda zumraddek yashil gilamga aylanadi.',
+    defaultFilter: 'rulonli'
+  });
+  const rulonliRuHtml = buildCatalogPageRu({
+    canonicalPath: '/ru/katalog/rulonnyy-gazon/',
+    basePath: '/katalog/rulonli-gazon/',
+    title: 'Рулонный газон в Ташкенте — купить натуральный готовый газон из питомника | Eco Landshaft',
+    metaDesc: 'Продажа и укладка свежесрезанного 100% натурального рулонного газона из собственного питомника в Ташкенте. Цена от 9 000 до 30 000 сум/м².',
+    h1: 'Натуральный рулонный газон — готовый дерн из питомника',
+    subtitle: 'Двухлетний плотный рулонный газон с мощной корневой системой: ваш участок превратится в изумрудный ковер всего за 1 день.',
+    defaultFilter: 'rulonli'
+  });
+  writePage('katalog/rulonli-gazon/index.html', rulonliUzHtml);
+  writePage('uz-kr/katalog/rulonli-gazon/index.html', convertUzHtmlToUzKr(rulonliUzHtml, '/katalog/rulonli-gazon/'));
+  writePage('ru/katalog/rulonnyy-gazon/index.html', rulonliRuHtml);
 
   // 5. All 6 Service Pages
   SERVICES.forEach((service, idx) => {
     const serviceRu = SERVICES_RU[idx];
-    const relFile = service.url.replace(/^\//, '') + 'index.html';
-    writeLocalizedPair(relFile, service.url, buildServicePage(service), buildServicePageRu(serviceRu));
-    basePaths.push(service.url);
+    const relFileUz = service.url.replace(/^\//, '') + 'index.html';
+    const relFileRu = serviceRu.url.replace(/^\//, '') + 'index.html';
+    const uzHtml = buildServicePage(service);
+    const ruHtml = buildServicePageRu(serviceRu);
+
+    writePage(relFileUz, uzHtml);
+    writePage(`uz-kr/${relFileUz}`, convertUzHtmlToUzKr(uzHtml, service.url));
+    writePage(relFileRu, ruHtml);
   });
 
   // 6. All 6 Regional Pages
   REGIONS.forEach((region, idx) => {
     const regionRu = REGIONS_RU[idx];
-    const relFile = region.url.replace(/^\//, '') + 'index.html';
-    writeLocalizedPair(relFile, region.url, buildRegionPage(region), buildRegionPageRu(regionRu));
-    basePaths.push(region.url);
+    const relFileUz = region.url.replace(/^\//, '') + 'index.html';
+    const relFileRu = regionRu.url.replace(/^\//, '') + 'index.html';
+    const uzHtml = buildRegionPage(region);
+    const ruHtml = buildRegionPageRu(regionRu);
+
+    writePage(relFileUz, uzHtml);
+    writePage(`uz-kr/${relFileUz}`, convertUzHtmlToUzKr(uzHtml, region.url));
+    writePage(relFileRu, ruHtml);
   });
 
-  // 7. About, Blog, Contact
-  writeLocalizedPair('biz-haqimizda/index.html', '/biz-haqimizda/', buildAboutPage(), buildAboutPageRu());
-  basePaths.push('/biz-haqimizda/');
+  // 7. About page
+  const aboutUzHtml = buildAboutPage();
+  const aboutRuHtml = buildAboutPageRu();
+  writePage('biz-haqimizda/index.html', aboutUzHtml);
+  writePage('uz-kr/biz-haqimizda/index.html', convertUzHtmlToUzKr(aboutUzHtml, '/biz-haqimizda/'));
+  writePage('ru/o-nas/index.html', aboutRuHtml);
 
-  writeLocalizedPair('blog/index.html', '/blog/', buildBlogPage(), buildBlogPageRu());
-  basePaths.push('/blog/');
+  // 8. Blog page
+  const blogUzHtml = buildBlogPage();
+  const blogRuHtml = buildBlogPageRu();
+  writePage('blog/index.html', blogUzHtml);
+  writePage('uz-kr/blog/index.html', convertUzHtmlToUzKr(blogUzHtml, '/blog/'));
+  writePage('ru/blog/index.html', blogRuHtml);
 
-  writeLocalizedPair('boglanish/index.html', '/boglanish/', buildContactPage(), buildContactPageRu());
-  basePaths.push('/boglanish/');
+  // 9. Contact page
+  const contactUzHtml = buildContactPage();
+  const contactRuHtml = buildContactPageRu();
+  writePage('boglanish/index.html', contactUzHtml);
+  writePage('uz-kr/boglanish/index.html', convertUzHtmlToUzKr(contactUzHtml, '/boglanish/'));
+  writePage('ru/kontakty/index.html', contactRuHtml);
 
-  // 8. Multi-language Sitemap with xhtml:link hreflang annotations
+  // 10. Multi-language Sitemap with xhtml:link hreflang annotations
   const sitemapEntries = [];
-  basePaths.forEach((bp) => {
-    const uzLoc = `${BRAND.domain}${bp}`;
-    const uzKrLoc = `${BRAND.domain}/uz-kr${bp === '/' ? '/' : bp}`;
-    const ruLoc = `${BRAND.domain}/ru${bp === '/' ? '/' : bp}`;
+  ROUTE_MAP.forEach((route) => {
+    const uzLoc = `${BRAND.domain}${route.uz}`;
+    const uzKrLoc = `${BRAND.domain}${route['uz-kr']}`;
+    const ruLoc = `${BRAND.domain}${route.ru}`;
     const alternates = [
       `    <xhtml:link rel="alternate" hreflang="uz" href="${uzLoc}"/>`,
       `    <xhtml:link rel="alternate" hreflang="uz-Latn" href="${uzLoc}"/>`,
@@ -4188,13 +4254,13 @@ function buildAll() {
     ].join('\n');
 
     [
-      { loc: uzLoc, prio: bp === '/' ? '1.0' : '0.9' },
-      { loc: uzKrLoc, prio: bp === '/' ? '0.9' : '0.85' },
-      { loc: ruLoc, prio: bp === '/' ? '0.95' : '0.9' }
+      { loc: uzLoc, prio: route.uz === '/' ? '1.0' : '0.9' },
+      { loc: uzKrLoc, prio: route.uz === '/' ? '0.9' : '0.85' },
+      { loc: ruLoc, prio: route.ru === '/ru/' ? '0.95' : '0.9' }
     ].forEach(({ loc, prio }) => {
       sitemapEntries.push(`  <url>
     <loc>${loc}</loc>
-    <lastmod>2026-10-24</lastmod>
+    <lastmod>2026-10-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>${prio}</priority>
 ${alternates}
@@ -4207,7 +4273,7 @@ ${alternates}
 ${sitemapEntries.join('\n')}
 </urlset>`;
   fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), sitemapXml, 'utf8');
-  console.log('Generated: sitemap.xml (57 localized URLs with hreflang)');
+  console.log(`Generated: sitemap.xml (${ROUTE_MAP.length * 3} localized URLs with hreflang)`);
 }
 
 buildAll();
